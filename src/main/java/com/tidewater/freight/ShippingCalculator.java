@@ -10,14 +10,11 @@ public class ShippingCalculator {
         this.heavyItemSurcharge = heavyItemSurcharge;
     }
 
-    public double calculateCost(String zone, double weightKg, String serviceLevel) {
+    public double calculateCost(String zone, double weightKg, ServiceLevel serviceLevel) {
             double cost = zoneRules.findRule(zone).price(weightKg);
 
-            // express costs more
-            if (serviceLevel.equals("EXPRESS")) {
-                cost = cost * 1.5;
-            }
+            cost = cost + heavyItemSurcharge.forWeight(weightKg);
 
-            return cost;
+            return serviceLevel.apply(cost);
     }
 }
