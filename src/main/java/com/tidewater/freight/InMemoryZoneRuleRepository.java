@@ -31,7 +31,7 @@ public class InMemoryZoneRuleRepository implements ZoneRuleRepository{
     public ZonePricingRule findRule(String zone) {
         ZonePricingRule rule = rulesByZone.get(zone);
         if (rule == null) {
-            throw new IllegalArgumentException("Unknown zone: " + zone);
+            throw new UnknownZoneException(zone);
         }
         return rule;
     }
