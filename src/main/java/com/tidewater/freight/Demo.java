@@ -2,7 +2,7 @@ package com.tidewater.freight;
 
 public class Demo {
     public static void main(String[] args) {
-        ShippingCalculator calculator = new ShippingCalculator(new InMemoryRateRepository(), new HeavyItemSurcharge());
+        ShippingCalculator calculator = new ShippingCalculator(InMemoryZoneRuleRepository.withStandardRules(), new HeavyItemSurcharge());
 
         System.out.println("Result DOMESTIC 10kg STANDARD       -> " + calculator.calculateCost("DOMESTIC", 10, "STANDARD"));
         System.out.println("Result INTERNATIONAL 40kg EXPRESS   -> " + calculator.calculateCost("INTERNATIONAL", 40, "EXPRESS"));
