@@ -2,8 +2,11 @@ package com.tidewater.freight;
 
 public class ShippingCalculator {
 
-    // The calculator makes its own rate source, so callers and tests cannot give it another.
-    private final RateRepository repository = new InMemoryRateRepository();
+    private final RateRepository repository;
+
+    public ShippingCalculator(RateRepository repository) {
+        this.repository = repository;
+    }
 
     public double calculateCost(String zone, double weightKg, String serviceLevel) {
         try {
