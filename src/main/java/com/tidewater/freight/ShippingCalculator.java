@@ -9,7 +9,6 @@ public class ShippingCalculator {
     }
 
     public double calculateCost(String zone, double weightKg, String serviceLevel) {
-        try {
             double rate = repository.findRate(zone);
             double cost = rate * weightKg;
 
@@ -32,11 +31,6 @@ public class ShippingCalculator {
                 cost = cost * 1.5;
             }
 
-            System.out.println("Shipping " + zone + " (" + weightKg + "kg, " + serviceLevel + "): GHS " + cost);
             return cost;
-        } catch (Exception e) {
-            // could not work out a rate (for example an unknown zone) - return zero
-            return 0;
-        }
     }
 }
