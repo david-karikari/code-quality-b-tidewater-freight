@@ -3,9 +3,11 @@ package com.tidewater.freight;
 public class ShippingCalculator {
 
     private final RateRepository repository;
+    private final HeavyItemSurcharge heavyItemSurcharge;
 
-    public ShippingCalculator(RateRepository repository) {
+    public ShippingCalculator(RateRepository repository, HeavyItemSurcharge heavyItemSurcharge) {
         this.repository = repository;
+        this.heavyItemSurcharge = heavyItemSurcharge;
     }
 
     public double calculateCost(String zone, double weightKg, String serviceLevel) {
@@ -22,9 +24,7 @@ public class ShippingCalculator {
             }
 
             // heavy-item surcharge
-            if (weightKg > 30) {
-                cost = cost + 20;
-            }
+            cost = cost + heavyItemSurcharge.forWeight(weightKg);
 
             // express costs more
             if (serviceLevel.equals("EXPRESS")) {
