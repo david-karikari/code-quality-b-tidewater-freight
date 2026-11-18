@@ -1,12 +1,14 @@
 package com.tidewater.freight;
 
+import java.math.BigDecimal;
+
 public final class FlatRateZoneRule implements ZonePricingRule {
 
     private final String zone;
-    private final double ratePerKg;
-    private final double fixedFee;
+    private final BigDecimal ratePerKg;
+    private final BigDecimal fixedFee;
 
-    public FlatRateZoneRule(String zone, double ratePerKg, double fixedFee) {
+    public FlatRateZoneRule(String zone, BigDecimal ratePerKg, BigDecimal fixedFee) {
         this.zone = zone;
         this.ratePerKg = ratePerKg;
         this.fixedFee = fixedFee;
@@ -18,7 +20,7 @@ public final class FlatRateZoneRule implements ZonePricingRule {
     }
 
     @Override
-    public double price(double weightKg) {
-        return ratePerKg * weightKg + fixedFee;
+    public BigDecimal price(BigDecimal weightKg) {
+        return ratePerKg.multiply(weightKg).add(fixedFee);
     }
 }

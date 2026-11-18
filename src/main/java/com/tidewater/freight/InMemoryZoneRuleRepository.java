@@ -1,5 +1,6 @@
 package com.tidewater.freight;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -21,9 +22,9 @@ public class InMemoryZoneRuleRepository implements ZoneRuleRepository{
     /** Tidewater's current zones. Adding a zone means adding one rule to this list. */
     public static InMemoryZoneRuleRepository withStandardRules() {
         return new InMemoryZoneRuleRepository(List.of(
-                new FlatRateZoneRule("DOMESTIC", 5.0, 0),
-                new FlatRateZoneRule("REGIONAL", 8.0, 10),
-                new FlatRateZoneRule("INTERNATIONAL", 15.0, 25)));
+                new FlatRateZoneRule("DOMESTIC", new BigDecimal("5"), BigDecimal.ZERO),
+                new FlatRateZoneRule("REGIONAL", new BigDecimal("8"), new BigDecimal("10")),
+                new FlatRateZoneRule("INTERNATIONAL", new BigDecimal("15"), new BigDecimal("25"))));
     }
 
     @Override

@@ -1,6 +1,12 @@
 package com.tidewater.freight;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public class ShippingCalculator {
+
+    private static final int CURRENCY_SCALE = 2;
+    private static final RoundingMode ROUNDING = RoundingMode.HALF_UP;
 
     private final ZoneRuleRepository zoneRules;
     private final HeavyItemSurcharge heavyItemSurcharge;
@@ -10,11 +16,10 @@ public class ShippingCalculator {
         this.heavyItemSurcharge = heavyItemSurcharge;
     }
 
-    public double calculateCost(String zone, double weightKg, ServiceLevel serviceLevel) {
-            double cost = zoneRules.findRule(zone).price(weightKg);
-
-            cost = cost + heavyItemSurcharge.forWeight(weightKg);
-
-            return serviceLevel.apply(cost);
+    public BigDecimal calculateCost(String zone, BigDecimal weightKg, ServiceLevel serviceLevel) {
+        BigDecimal zonePrice = zoneRules.findRule(zone).price(weightKg);
+        BigDecimal withSurcharge = zonePrice.add(heavyItemSurcharge.forWeight(weightKg));
+        BigDecimal total = serviceLevel.apply(withSurcharge);
+        return total.setScale(CURRENCY_SCALE, ROUNDING);
     }
 }
