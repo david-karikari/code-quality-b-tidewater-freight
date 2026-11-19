@@ -120,3 +120,63 @@ These were not in the brief. Each is a single place to change if the answer diff
 | Item | Verdict | Reason |
 |---|---|---|
 | Rates, fees, the 30 kg threshold, the 20 surcharge, the 1.5 multiplier | Kept | They are the business rules
+
+## Testing
+
+The suite has 60 tests, in JUnit 5 with Mockito. It runs with `mvn test`.
+
+| Test class | Tests | What it covers |
+|---|---|---|
+| `ShippingCalculatorPricingTest` | 15 | Exact prices with the real collaborators, including the 30 kg boundary, rounding and a new zone added without touching the calculator |
+| `ShippingCalculatorTest` | 6 | The calculator's own job with mocked collaborators: order of operations, rounding, and failures reaching the caller |
+| `ShipmentTest` | 13 | Validation of zone, weight and service level, and what each exception carries |
+| `InMemoryZoneRuleRepositoryTest` | 11 | Lookup, the standard rates and fees, unknown zones, duplicate rules |
+| `HeavyItemSurchargeTest` | 7 | The threshold at 29.99, 30, 30.00 and 30.01 kg |
+| `FlatRateZoneRuleTest` | 4 | Rate per kg plus fixed fee |
+| `ServiceLevelTest` | 4 | The multipliers, and that `apply` does not round |
+
+### What makes these tests trustworthy
+
+- **Every test asserts a real value or a thrown exception.** None of them can pass on `> 0` or a non-null check, which is how the AI-generated tests passed.
+- **Money is compared by value, never by scale.** `Amounts.assertAmountEquals` uses `compareTo`, and expected values are written as strings.
+- **Mocks replace collaborators, never the class under test.** The Mockito tests assert the price that comes back. A `verify` is only a secondary check.
+- **Exceptions are asserted by type and by the data they carry** (`getZone()`, `getWeightKg()`), plus that the message names the offending values. Whole messages are not compared, so rewording one does not break a test.
+- **No test compares console output.** `Demo` is excluded from the reports for that reason (see Known limitations).
+- **Test values were chosen to catch specific mistakes.** For example, a rate of 8 and a weight of 3 give 34, which differs from 8 + 3 + 10 and from 8 x 3 - 10. Rounding 10.005 gives 10.01 half up but 10.00 half even.
+
+### Cases covered
+
+| Kind | Examples |
+|---|---|
+| Happy path | Each zone at standard and express; the combined order of surcharge and multiplier |
+| Edge cases | 29.99, 30, 30.00 and 30.01 kg; 0.1 kg; the smallest accepted weight of 0.001 kg; half-up rounding at 58.275, 224.925, 2317.275 and 10.005; results always at two decimal places |
+| Failures | Unknown, lower-case, null and blank zone; zero, negative and missing weight; missing service level; null shipment; null dependencies; duplicate zone rules; a failure inside a rule reaching the caller unchanged |
+
+`aFailureInsideARuleIsNeverSwallowed` and `anUnknownZoneReachesTheCallerUnchanged` are the tests that would have failed against the original `catch (Exception) { return 0; }`.
+
+### Results
+
+Run under JDK 21.
+
+| Measure | Result |
+|---|---|
+| Tests | 60 run, 0 failures |
+| JaCoCo line coverage | FILL |
+| JaCoCo instruction coverage | FILL |
+| JaCoCo branch coverage | FILL |
+| PIT mutation coverage | FILL (killed / generated) |
+| PIT test strength | FILL |
+
+`Demo` is excluded from both reports. Before the exclusion, the only uncovered code was `Demo`: JaCoCo showed 82% of instructions and 100% of branches, and PIT killed 14 of 20 mutants with none surviving and 6 not covered.
+
+### Manual mutation checks
+
+PIT's default mutators change primitive operators and comparisons. This code does its arithmetic with `BigDecimal` method calls, which PIT does not change, so a clean PIT result alone proves less here than usual. To cover that, five deliberate bugs were introduced one at a time and the suite was run after each. Every change was reverted afterwards.
+
+| # | Deliberate bug | Failures | Failing tests |
+|---|---|---|---|
+| 1 | `HeavyItemSurcharge`: `> 0` changed to `>= 0` | FILL | FILL |
+| 2 | `ServiceLevel`: express `"1.5"` changed to `"1.4"` | FILL | FILL |
+| 3 | `ShippingCalculator`: `HALF_UP` changed to `HALF_EVEN` | FILL | FILL |
+| 4 | `FlatRateZoneRule`: `.add(fixedFee)` removed | FILL | FILL |
+| 5 | `ShippingCalculator`: service level applied before the surcharge | FILL | FILL |
