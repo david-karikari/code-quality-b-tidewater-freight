@@ -4,6 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 import java.util.List;
+
+import com.tidewater.freight.app.ShippingCalculator;
+import com.tidewater.freight.model.ServiceLevel;
+import com.tidewater.freight.model.Shipment;
+import com.tidewater.freight.pricing.FlatRateZoneRule;
+import com.tidewater.freight.pricing.HeavyItemSurcharge;
+import com.tidewater.freight.pricing.ZonePricingRule;
+import com.tidewater.freight.repository.InMemoryZoneRuleRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;

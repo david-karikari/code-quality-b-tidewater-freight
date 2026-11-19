@@ -1,8 +1,9 @@
-package com.tidewater.freight;
+package com.tidewater.freight.pricing;
 
-import static com.tidewater.freight.Amounts.assertAmountEquals;
+import static com.tidewater.freight.testsupport.Amounts.assertAmountEquals;
 
 import java.math.BigDecimal;
+
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 

@@ -1,4 +1,11 @@
-package com.tidewater.freight;
+package com.tidewater.freight.app;
+
+import com.tidewater.freight.exception.ShippingException;
+import com.tidewater.freight.model.ServiceLevel;
+import com.tidewater.freight.model.Shipment;
+import com.tidewater.freight.model.ShippingQuote;
+import com.tidewater.freight.pricing.HeavyItemSurcharge;
+import com.tidewater.freight.repository.InMemoryZoneRuleRepository;
 
 import java.math.BigDecimal;
 
@@ -19,7 +26,11 @@ public class Demo {
         String label = zone + " " + weightKg + "kg " + level;
         try {
             Shipment shipment = new Shipment(zone, new BigDecimal(weightKg), level);
-            System.out.println(label + " -> GHS " + calculator.calculateCost(shipment));
+            ShippingQuote quote = calculator.quote(shipment);
+            System.out.println(label + " -> GHS " + quote.total()
+                    + " (zone price " + quote.zonePrice().toPlainString()
+                    + " + heavy-item surcharge " + quote.heavyItemSurcharge().toPlainString()
+                    + ", " + quote.serviceLevel() + ")");
         } catch (ShippingException e) {
             System.out.println(label + " -> rejected: " + e.getMessage());
         }

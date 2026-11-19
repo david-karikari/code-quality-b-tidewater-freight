@@ -1,9 +1,10 @@
-package com.tidewater.freight;
+package com.tidewater.freight.pricing;
 
-import static com.tidewater.freight.Amounts.assertAmountEquals;
+import static com.tidewater.freight.testsupport.Amounts.assertAmountEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
+
 import org.junit.jupiter.api.Test;
 
 class FlatRateZoneRuleTest {

@@ -1,6 +1,6 @@
-package com.tidewater.freight;
+package com.tidewater.freight.exception;
 
-public class UnknownZoneException extends ShippingException{
+public class UnknownZoneException extends ShippingException {
 
     private final String zone;
 

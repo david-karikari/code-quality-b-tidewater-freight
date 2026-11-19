@@ -1,4 +1,8 @@
-package com.tidewater.freight;
+package com.tidewater.freight.repository;
+
+import com.tidewater.freight.exception.UnknownZoneException;
+import com.tidewater.freight.pricing.FlatRateZoneRule;
+import com.tidewater.freight.pricing.ZonePricingRule;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -6,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class InMemoryZoneRuleRepository implements ZoneRuleRepository{
+public class InMemoryZoneRuleRepository implements ZoneRuleRepository {
 
     private final Map<String, ZonePricingRule> rulesByZone = new HashMap<>();
 

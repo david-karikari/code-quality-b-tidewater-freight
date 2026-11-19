@@ -1,8 +1,9 @@
-package com.tidewater.freight;
+package com.tidewater.freight.model;
 
-import static com.tidewater.freight.Amounts.assertAmountEquals;
+import static com.tidewater.freight.testsupport.Amounts.assertAmountEquals;
 
 import java.math.BigDecimal;
+
 import org.junit.jupiter.api.Test;
 
 class ServiceLevelTest {

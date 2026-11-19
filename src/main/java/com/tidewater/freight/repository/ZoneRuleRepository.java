@@ -1,4 +1,7 @@
-package com.tidewater.freight;
+package com.tidewater.freight.repository;
+
+import com.tidewater.freight.exception.UnknownZoneException;
+import com.tidewater.freight.pricing.ZonePricingRule;
 
 public interface ZoneRuleRepository {
 

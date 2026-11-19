@@ -1,6 +1,6 @@
-package com.tidewater.freight;
+package com.tidewater.freight.repository;
 
-import static com.tidewater.freight.Amounts.assertAmountEquals;
+import static com.tidewater.freight.testsupport.Amounts.assertAmountEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -9,6 +9,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.List;
+
+import com.tidewater.freight.exception.UnknownZoneException;
+import com.tidewater.freight.pricing.FlatRateZoneRule;
+import com.tidewater.freight.pricing.ZonePricingRule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;

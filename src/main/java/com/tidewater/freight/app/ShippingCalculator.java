@@ -1,4 +1,10 @@
-package com.tidewater.freight;
+package com.tidewater.freight.app;
+
+import com.tidewater.freight.exception.UnknownZoneException;
+import com.tidewater.freight.model.Shipment;
+import com.tidewater.freight.model.ShippingQuote;
+import com.tidewater.freight.pricing.HeavyItemSurcharge;
+import com.tidewater.freight.repository.ZoneRuleRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -32,10 +38,20 @@ public class ShippingCalculator {
 
     /** @throws UnknownZoneException if no pricing rule exists for the shipment's zone */
     public BigDecimal calculateCost(Shipment shipment) {
+        return quote(shipment).total();
+    }
+
+    /**
+     * Prices the shipment and returns each step of the calculation with the total.
+     *
+     * @throws UnknownZoneException if no pricing rule exists for the shipment's zone
+     */
+    public ShippingQuote quote(Shipment shipment) {
         Objects.requireNonNull(shipment, "shipment must not be null");
         BigDecimal zonePrice = zoneRules.findRule(shipment.zone()).price(shipment.weightKg());
-        BigDecimal withSurcharge = zonePrice.add(heavyItemSurcharge.forWeight(shipment.weightKg()));
-        BigDecimal total = shipment.serviceLevel().apply(withSurcharge);
-        return total.setScale(CURRENCY_SCALE, ROUNDING);
+        BigDecimal surcharge = heavyItemSurcharge.forWeight(shipment.weightKg());
+        BigDecimal total = shipment.serviceLevel().apply(zonePrice.add(surcharge))
+                .setScale(CURRENCY_SCALE, ROUNDING);
+        return new ShippingQuote(zonePrice, surcharge, shipment.serviceLevel(), total);
     }
 }

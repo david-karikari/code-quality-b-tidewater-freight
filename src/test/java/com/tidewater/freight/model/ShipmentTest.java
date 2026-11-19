@@ -1,6 +1,6 @@
-package com.tidewater.freight;
+package com.tidewater.freight.model;
 
-import static com.tidewater.freight.Amounts.assertAmountEquals;
+import static com.tidewater.freight.testsupport.Amounts.assertAmountEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -8,6 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+
+import com.tidewater.freight.exception.InvalidShipmentException;
+import com.tidewater.freight.exception.InvalidWeightException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;

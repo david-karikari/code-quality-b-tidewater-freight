@@ -43,23 +43,48 @@ Example: `INTERNATIONAL`, 40 kg, `EXPRESS` is (15 x 40 + 25 + 20) x 1.5 = 967.50
 
 ## Structure
 
-Each class has one job. Dependencies are passed in through constructors.
+```
+com.tidewater.freight
+com.tidewater.freight
+├── app
+│   ├── ShippingCalculator
+│   └── Demo
+├── model
+│   ├── Shipment
+│   ├── ShippingQuote
+│   └── ServiceLevel
+├── pricing
+│   ├── ZonePricingRule
+│   ├── FlatRateZoneRule
+│   └── HeavyItemSurcharge
+├── repository
+│   ├── ZoneRuleRepository
+│   └── InMemoryZoneRuleRepository
+└── exception
+    ├── ShippingException
+    ├── UnknownZoneException
+    ├── InvalidWeightException
+    └── InvalidShipmentException
+```
 
-| Class | Responsibility |
-|---|---|
-| `ShippingCalculator` | Combines the zone price, the surcharge and the service level, then rounds. Contains no zone names and no numbers. |
-| `Shipment` | The request: zone, weight and service level. It rejects invalid values when it is created, so the calculator never sees them. |
-| `ZoneRuleRepository` | Interface for finding the pricing rule of a zone. |
-| `InMemoryZoneRuleRepository` | Holds the rules in memory. `withStandardRules()` lists Tidewater's current zones. |
-| `ZonePricingRule` | Interface for one zone's pricing. |
-| `FlatRateZoneRule` | A zone priced as a rate per kg plus a fixed fee. |
-| `HeavyItemSurcharge` | The over-30 kg rule, with the threshold and amount as named constants. |
-| `ServiceLevel` | Enum of the delivery speeds and their multipliers. |
-| `ShippingException` | Base type for every failure the service reports on purpose. |
-| `UnknownZoneException` | No pricing rule exists for the zone. Carries the zone. |
-| `InvalidWeightException` | The weight is missing, zero or negative. Carries the zone and the weight. |
-| `InvalidShipmentException` | The zone or service level is missing. |
-| `Demo` | Console entry point. It is the single place that catches `ShippingException` and reports it. |
+Each class has one job. Dependencies are passed in through constructors and point one way: `exception` and `pricing` depend on nothing else in the project, `model` depends on `exception`, `repository` depends on `pricing` and `exception`, and `ShippingCalculator` depends on all four. Tests mirror this layout, and the shared test helper `Amounts` is in `testsupport`.
+
+| Class | Package | Responsibility |
+|---|---|---|
+| `ShippingCalculator` | root | Combines the zone price, the surcharge and the service level, then rounds. Contains no zone names and no numbers. |
+| `Demo` | root | Console entry point. It is the single place that catches `ShippingException` and reports it. |
+| `Shipment` | `model` | The request: zone, weight and service level. It rejects invalid values when it is created, so the calculator never sees them. |
+| `ShippingQuote` | `model` | The price with each step that produced it. |
+| `ServiceLevel` | `model` | Enum of the delivery speeds and their multipliers. |
+| `ZonePricingRule` | `pricing` | Interface for one zone's pricing. |
+| `FlatRateZoneRule` | `pricing` | A zone priced as a rate per kg plus a fixed fee. |
+| `HeavyItemSurcharge` | `pricing` | The over-30 kg rule, with the threshold and amount as named constants. |
+| `ZoneRuleRepository` | `repository` | Interface for finding the pricing rule of a zone. |
+| `InMemoryZoneRuleRepository` | `repository` | Holds the rules in memory. `withStandardRules()` lists Tidewater's current zones. |
+| `ShippingException` | `exception` | Base type for every failure the service reports on purpose. |
+| `UnknownZoneException` | `exception` | No pricing rule exists for the zone. Carries the zone. |
+| `InvalidWeightException` | `exception` | The weight is missing, zero or negative. Carries the zone and the weight. |
+| `InvalidShipmentException` | `exception` | The zone or service level is missing. |
 
 ## Adding a new zone
 
@@ -119,11 +144,16 @@ These were not in the brief. Each is a single place to change if the answer diff
 
 | Item | Verdict | Reason |
 |---|---|---|
-| Rates, fees, the 30 kg threshold, the 20 surcharge, the 1.5 multiplier | Kept | They are the business rules
+| Rates, fees, the 30 kg threshold, the 20 surcharge, the 1.5 multiplier | Kept | They are the business rules |
+| Order of operations (surcharge, then service level, then rounding) | Kept | It was the original order |
+| `catch (Exception)` returning 0 | Rewritten | Failures now reach the caller as `ShippingException` |
+| `double` arithmetic | Rewritten | Replaced with `BigDecimal` and one rounding step |
+| Chain of zone conditions | Rewritten | One `ZonePricingRule` per zone |
+
 
 ## Testing
 
-The suite has 60 tests, in JUnit 5 with Mockito. It runs with `mvn test`.
+The suite has 66 tests, in JUnit 5 with Mockito. It runs with `mvn test`.
 
 | Test class | Tests | What it covers |
 |---|---|---|
@@ -134,6 +164,7 @@ The suite has 60 tests, in JUnit 5 with Mockito. It runs with `mvn test`.
 | `HeavyItemSurchargeTest` | 7 | The threshold at 29.99, 30, 30.00 and 30.01 kg |
 | `FlatRateZoneRuleTest` | 4 | Rate per kg plus fixed fee |
 | `ServiceLevelTest` | 4 | The multipliers, and that `apply` does not round |
+| `ShippingCalculatorQuoteTest` | 6 | The itemised quote: each component is exact, only the total is rounded, and `calculateCost` equals the quote total |
 
 ### What makes these tests trustworthy
 
@@ -161,11 +192,11 @@ Run under JDK 21.
 | Measure | Result |
 |---|---|
 | Tests | 60 run, 0 failures |
-| JaCoCo line coverage | FILL |
-| JaCoCo instruction coverage | FILL |
-| JaCoCo branch coverage | FILL |
-| PIT mutation coverage | FILL (killed / generated) |
-| PIT test strength | FILL |
+| JaCoCo line coverage | 100% (65 / 65 lines) |
+| JaCoCo instruction coverage | 100% (325 / 325) |
+| JaCoCo branch coverage | 100% (18 / 18) |
+| PIT mutation coverage | 100% (15 / 15) |
+| PIT test strength | 100% |
 
 `Demo` is excluded from both reports. Before the exclusion, the only uncovered code was `Demo`: JaCoCo showed 82% of instructions and 100% of branches, and PIT killed 14 of 20 mutants with none surviving and 6 not covered.
 
@@ -175,8 +206,44 @@ PIT's default mutators change primitive operators and comparisons. This code doe
 
 | # | Deliberate bug | Failures | Failing tests |
 |---|---|---|---|
-| 1 | `HeavyItemSurcharge`: `> 0` changed to `>= 0` | FILL | FILL |
-| 2 | `ServiceLevel`: express `"1.5"` changed to `"1.4"` | FILL | FILL |
-| 3 | `ShippingCalculator`: `HALF_UP` changed to `HALF_EVEN` | FILL | FILL |
-| 4 | `FlatRateZoneRule`: `.add(fixedFee)` removed | FILL | FILL |
-| 5 | `ShippingCalculator`: service level applied before the surcharge | FILL | FILL |
+| 1 | `HeavyItemSurcharge`: `> 0` changed to `>= 0` | 3 | HeavyItemSurchargeTest.chargesOnlyAboveThirtyKilograms (cases 3 and 4); ShippingCalculatorPricingTest.pricesEachShipmentExactly (case 7) |
+| 2 | `ServiceLevel`: express `"1.5"` changed to `"1.4"` | 14 | ServiceLevelTest (applyDoesNotRound, expressMultipliesTheCostByOnePointFive, expressOnALargeCostIsExact); ShippingCalculatorPricingTest (aNewZoneWithItsOwnRulesIsPricedWithoutChangingTheCalculator; pricesEachShipmentExactly cases 2, 4, 6, 10, 11, 12, 13); ShippingCalculatorQuoteTest (exposesEachStepOfTheCalculation, calculateCostIsTheTotalOfTheQuote); ShippingCalculatorTest (addsTheSurchargeBeforeApplyingTheServiceLevel) |
+| 3 | `ShippingCalculator`: `HALF_UP` changed to `HALF_EVEN` | 3 | ShippingCalculatorPricingTest.pricesEachShipmentExactly (case 11); ShippingCalculatorQuoteTest.componentsAreExactAndOnlyTheTotalIsRounded; ShippingCalculatorTest.roundsOnlyTheFinalTotalAndRoundsHalfUp |
+| 4 | `FlatRateZoneRule`: `.add(fixedFee)` removed | 13 | FlatRateZoneRuleTest (pricesRatePerKgTimesWeightPlusFixedFee, fractionalWeightsAreExact); InMemoryZoneRuleRepositoryTest.standardRulesCarryTheCurrentRatesAndFees (cases 2 and 3); ShippingCalculatorPricingTest.pricesEachShipmentExactly (cases 3, 4, 5, 6, 9, 12, 13); ShippingCalculatorQuoteTest (exposesEachStepOfTheCalculation, calculateCostIsTheTotalOfTheQuote) |
+| 5 | `ShippingCalculator`: service level applied before the surcharge | 5 | ShippingCalculatorPricingTest.pricesEachShipmentExactly (cases 6 and 13); ShippingCalculatorQuoteTest (exposesEachStepOfTheCalculation, calculateCostIsTheTotalOfTheQuote); ShippingCalculatorTest.addsTheSurchargeBeforeApplyingTheServiceLevel
+ |
+
+## Beyond the brief: itemised price breakdown
+
+`ShippingCalculator.quote(shipment)` returns a `ShippingQuote` with each step of the calculation: the zone price, the heavy-item surcharge, the service level and the rounded total. `calculateCost` is unchanged and returns the total of the same quote.
+
+Why it is worth having:
+
+- **A charge can be explained.** Support staff can tell a customer why a shipment cost 967.50, and finance can reconcile it, without repeating the arithmetic by hand.
+- **The order of operations is visible.** In the original code it was an undocumented business rule hidden inside one method.
+- **Failures are easier to locate.** The tests assert each step on its own, so a wrong rule shows up as a wrong component, not as a wrong total with no explanation.
+
+The components are exact and not rounded, so they can have more than two decimal places. Only the total is rounded. This matters: rounding each line and then adding them can disagree with the rounded total by one pesewa.
+
+## What to look out for in AI-generated code
+
+These are the mistakes this exercise found. Check for them in review:
+
+1. **A catch-all that returns a normal-looking value.** A failed calculation became a price of zero.
+2. **Tests that assert almost nothing.** `> 0` and "is not null" on a number accept almost any answer.
+3. **A test that mocks the class it is testing.** It proves the mock works, not the code.
+4. **Hidden dependencies.** A `new` inside the class made it impossible to test without the real collaborator.
+5. **Business rules hard-coded as a chain of conditions.** Adding a zone meant editing working code, and a zone missed in the chain was priced with no fee and no error.
+6. **`double` for money.** It was correct on the happy path and wrong on the cents.
+7. **Green tests taken as proof.** The original suite passed. Only checking what each test could fail on showed it proved nothing.
+
+## Known limitations
+
+| Limitation | Notes |
+|---|---|
+| Rates and fees are defined in code | A change needs a redeploy. `ZoneRuleRepository` is an interface, so a database or file implementation can replace the in-memory one without touching the calculator. |
+| Zone codes are free strings | A mistyped zone fails at runtime with `UnknownZoneException`, which names the zone. It is not caught at compile time. |
+| One currency and one unit | Prices are in GHS and weights in kg. Neither is a type. |
+| `Demo` is not covered by tests | It is excluded from the coverage and mutation reports because it is a console entry point. Its one catch block is checked by running it. |
+| PIT cannot mutate `BigDecimal` arithmetic | The manual mutation checks above cover this. They were done by hand and are not repeated automatically. |
+| No logging | Failures are thrown to the caller and reported at the edge. Adding logging would belong in the caller, next to the single catch. |

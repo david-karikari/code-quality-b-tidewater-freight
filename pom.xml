@@ -129,7 +129,7 @@
                         <param>com.tidewater.freight.*</param>
                     </targetTests>
                     <excludedClasses>
-                        <param>com.tidewater.freight.Demo</param>
+                        <param>com.tidewater.freight.app.Demo</param>
                     </excludedClasses>
                 </configuration>
             </plugin>

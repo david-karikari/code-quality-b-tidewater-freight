@@ -1,8 +1,8 @@
-package com.tidewater.freight;
+package com.tidewater.freight.exception;
 
 import java.math.BigDecimal;
 
-public class InvalidWeightException extends ShippingException{
+public class InvalidWeightException extends ShippingException {
 
     private final String zone;
     private final BigDecimal weightKg;
