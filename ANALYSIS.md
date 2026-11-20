@@ -2,7 +2,7 @@
 
 Scope: `ShippingCalculator`, `RateRepository`, `InMemoryRateRepository`, `Demo`, and `ShippingCalculatorTest`, as received (before any change).
 
-Evidence key: **[measured]** means I ran the unmodified code and observed the result. **[predicted]** means a mutation-testing expectation that will be confirmed with PIT once the new suite exists.
+Evidence key: **[measured]** means I ran the unmodified code and observed the result. **[predicted]** means an expectation I reasoned out from reading the original tests. I did not run it.
 
 ## 1. Most serious problem
 

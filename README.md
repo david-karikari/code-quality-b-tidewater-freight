@@ -13,13 +13,13 @@ Requires JDK 21 and Maven.
 | Run the tests | `mvn test` |
 | Tests plus coverage report | `mvn verify`, then open `target/site/jacoco/index.html` |
 | Mutation testing | `mvn test-compile org.pitest:pitest-maven:mutationCoverage`, then open the newest folder under `target/pit-reports/` |
-| Run the demo | `mvn compile`, then `java -cp target/classes com.tidewater.freight.Demo` |
+| Run the demo | `mvn compile`, then `java -cp target/classes com.tidewater.freight.app.Demo` |
 
 Expected demo output:
 
 ```
-DOMESTIC 10kg STANDARD -> GHS 50.00
-INTERNATIONAL 40kg EXPRESS -> GHS 967.50
+DOMESTIC 10kg STANDARD -> GHS 50.00 (zone price 50 + heavy-item surcharge 0, STANDARD)
+INTERNATIONAL 40kg EXPRESS -> GHS 967.50 (zone price 625 + heavy-item surcharge 20, EXPRESS)
 MOON 10kg STANDARD -> rejected: No pricing rule for zone: MOON
 DOMESTIC -5kg STANDARD -> rejected: Weight must be greater than zero for zone DOMESTIC but was -5
 ```
@@ -44,7 +44,6 @@ Example: `INTERNATIONAL`, 40 kg, `EXPRESS` is (15 x 40 + 25 + 20) x 1.5 = 967.50
 ## Structure
 
 ```
-com.tidewater.freight
 com.tidewater.freight
 ├── app
 │   ├── ShippingCalculator
@@ -71,8 +70,8 @@ Each class has one job. Dependencies are passed in through constructors and poin
 
 | Class | Package | Responsibility |
 |---|---|---|
-| `ShippingCalculator` | root | Combines the zone price, the surcharge and the service level, then rounds. Contains no zone names and no numbers. |
-| `Demo` | root | Console entry point. It is the single place that catches `ShippingException` and reports it. |
+| `ShippingCalculator` | app | Combines the zone price, the surcharge and the service level, then rounds. Contains no zone names and no numbers. |
+| `Demo` | app | Console entry point. It is the single place that catches `ShippingException` and reports it. |
 | `Shipment` | `model` | The request: zone, weight and service level. It rejects invalid values when it is created, so the calculator never sees them. |
 | `ShippingQuote` | `model` | The price with each step that produced it. |
 | `ServiceLevel` | `model` | Enum of the delivery speeds and their multipliers. |
@@ -142,13 +141,22 @@ These were not in the brief. Each is a single place to change if the answer diff
 
 ## What was kept, fixed or rewritten
 
+## Refactoring decisions
+
 | Item | Verdict | Reason |
 |---|---|---|
-| Rates, fees, the 30 kg threshold, the 20 surcharge, the 1.5 multiplier | Kept | They are the business rules |
-| Order of operations (surcharge, then service level, then rounding) | Kept | It was the original order |
-| `catch (Exception)` returning 0 | Rewritten | Failures now reach the caller as `ShippingException` |
-| `double` arithmetic | Rewritten | Replaced with `BigDecimal` and one rounding step |
-| Chain of zone conditions | Rewritten | One `ZonePricingRule` per zone |
+| Rates, fees, the 30 kg threshold, the 20 surcharge, the 1.5 multiplier | Kept | They are the business rules, and they were correct. They now sit in named, tested places. |
+| Order of operations | Kept | It was the original business rule. It is now documented and guarded by a test that fails if it changes. |
+| Repository abstraction | Kept the idea, rewritten | The seam was good, but it returned a bare rate and was created inside the calculator. It now returns a rule and is injected. |
+| `ShippingCalculator` | Rewritten | It did five jobs, swallowed every failure and printed to the console. |
+| `catch (Exception)` returning 0 | Rewritten | Failures now reach the caller as `ShippingException`. |
+| `double` arithmetic | Rewritten | Replaced with `BigDecimal` and one rounding step. |
+| Chain of zone conditions | Rewritten | One `ZonePricingRule` per zone. |
+| `Demo` | Kept, adapted | The same scenarios, plus invalid input. It reports failures and shows the price breakdown. |
+| AI test `calculatesACost` | Rewritten | It asserted only `cost > 0`. |
+| AI test `calculatesExpressCost` | Rewritten | It tested a mock of the class under test, so no production code ran. |
+| AI test `returnsACostForAShipment` | Rewritten | `assertNotNull` on a primitive `double` cannot fail. |
+| `pom.xml`, JaCoCo and PIT setup | Kept, extended | Mockito runs as a Java agent, and `Demo` is excluded from the reports. |
 
 
 ## Testing
@@ -191,7 +199,7 @@ Run under JDK 21.
 
 | Measure | Result |
 |---|---|
-| Tests | 60 run, 0 failures |
+| Tests | 66 run, 0 failures |
 | JaCoCo line coverage | 100% (65 / 65 lines) |
 | JaCoCo instruction coverage | 100% (325 / 325) |
 | JaCoCo branch coverage | 100% (18 / 18) |
@@ -210,8 +218,7 @@ PIT's default mutators change primitive operators and comparisons. This code doe
 | 2 | `ServiceLevel`: express `"1.5"` changed to `"1.4"` | 14 | ServiceLevelTest (applyDoesNotRound, expressMultipliesTheCostByOnePointFive, expressOnALargeCostIsExact); ShippingCalculatorPricingTest (aNewZoneWithItsOwnRulesIsPricedWithoutChangingTheCalculator; pricesEachShipmentExactly cases 2, 4, 6, 10, 11, 12, 13); ShippingCalculatorQuoteTest (exposesEachStepOfTheCalculation, calculateCostIsTheTotalOfTheQuote); ShippingCalculatorTest (addsTheSurchargeBeforeApplyingTheServiceLevel) |
 | 3 | `ShippingCalculator`: `HALF_UP` changed to `HALF_EVEN` | 3 | ShippingCalculatorPricingTest.pricesEachShipmentExactly (case 11); ShippingCalculatorQuoteTest.componentsAreExactAndOnlyTheTotalIsRounded; ShippingCalculatorTest.roundsOnlyTheFinalTotalAndRoundsHalfUp |
 | 4 | `FlatRateZoneRule`: `.add(fixedFee)` removed | 13 | FlatRateZoneRuleTest (pricesRatePerKgTimesWeightPlusFixedFee, fractionalWeightsAreExact); InMemoryZoneRuleRepositoryTest.standardRulesCarryTheCurrentRatesAndFees (cases 2 and 3); ShippingCalculatorPricingTest.pricesEachShipmentExactly (cases 3, 4, 5, 6, 9, 12, 13); ShippingCalculatorQuoteTest (exposesEachStepOfTheCalculation, calculateCostIsTheTotalOfTheQuote) |
-| 5 | `ShippingCalculator`: service level applied before the surcharge | 5 | ShippingCalculatorPricingTest.pricesEachShipmentExactly (cases 6 and 13); ShippingCalculatorQuoteTest (exposesEachStepOfTheCalculation, calculateCostIsTheTotalOfTheQuote); ShippingCalculatorTest.addsTheSurchargeBeforeApplyingTheServiceLevel
- |
+| 5 | `ShippingCalculator`: service level applied before the surcharge | 5 | ShippingCalculatorPricingTest.pricesEachShipmentExactly (cases 6 and 13); ShippingCalculatorQuoteTest (exposesEachStepOfTheCalculation, calculateCostIsTheTotalOfTheQuote); ShippingCalculatorTest.addsTheSurchargeBeforeApplyingTheServiceLevel |
 
 ## Beyond the brief: itemised price breakdown
 
