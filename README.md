@@ -161,7 +161,7 @@ These were not in the brief. Each is a single place to change if the answer diff
 
 ## Testing
 
-The suite has 66 tests, in JUnit 5 with Mockito. It runs with `mvn test`.
+The suite has 70 tests, in JUnit 5 with Mockito. It runs with `mvn test`.
 
 | Test class | Tests | What it covers |
 |---|---|---|
