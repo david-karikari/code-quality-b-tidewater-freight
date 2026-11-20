@@ -10,7 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class InMemoryZoneRuleRepository implements ZoneRuleRepository {
+/** Holds zone rules in memory, indexed by zone code. */
+public final class InMemoryZoneRuleRepository implements ZoneRuleRepository {
 
     private final Map<String, ZonePricingRule> rulesByZone = new HashMap<>();
 

@@ -9,6 +9,7 @@ import com.tidewater.freight.repository.InMemoryZoneRuleRepository;
 
 import java.math.BigDecimal;
 
+/** Console demonstration of the shipping calculator. */
 public class Demo {
 
     public static void main(String[] args) {

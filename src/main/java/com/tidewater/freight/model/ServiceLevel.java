@@ -2,6 +2,7 @@ package com.tidewater.freight.model;
 
 import java.math.BigDecimal;
 
+/** Delivery speed. Each level scales the cost by a fixed multiplier. */
 public enum ServiceLevel {
 
     STANDARD("1.0"),

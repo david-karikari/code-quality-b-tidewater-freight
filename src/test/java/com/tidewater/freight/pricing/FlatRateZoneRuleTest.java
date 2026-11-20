@@ -1,7 +1,7 @@
 package com.tidewater.freight.pricing;
 
 import static com.tidewater.freight.testsupport.Amounts.assertAmountEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 
@@ -34,5 +34,38 @@ class FlatRateZoneRuleTest {
     @Test
     void reportsItsZoneCode() {
         assertEquals("REGIONAL", regional.zone());
+    }
+
+    @Test
+    void rejectsANegativeRateAndNamesTheZone() {
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> new FlatRateZoneRule("ARCTIC", new BigDecimal("-1"), BigDecimal.ZERO));
+
+        assertTrue(e.getMessage().contains("ARCTIC"));
+        assertTrue(e.getMessage().contains("-1"));
+    }
+
+    @Test
+    void rejectsANegativeFeeAndNamesTheZone() {
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> new FlatRateZoneRule("ARCTIC", BigDecimal.ONE, new BigDecimal("-0.5")));
+
+        assertTrue(e.getMessage().contains("ARCTIC"));
+        assertTrue(e.getMessage().contains("-0.5"));
+    }
+
+    @Test
+    void acceptsAZeroRateAndAZeroFee() {
+        assertDoesNotThrow(() -> new FlatRateZoneRule("FREE", BigDecimal.ZERO, BigDecimal.ZERO));
+    }
+
+    @Test
+    void rejectsMissingValues() {
+        assertThrows(NullPointerException.class,
+                () -> new FlatRateZoneRule(null, BigDecimal.ONE, BigDecimal.ZERO));
+        assertThrows(NullPointerException.class,
+                () -> new FlatRateZoneRule("ARCTIC", null, BigDecimal.ZERO));
+        assertThrows(NullPointerException.class,
+                () -> new FlatRateZoneRule("ARCTIC", BigDecimal.ONE, null));
     }
 }

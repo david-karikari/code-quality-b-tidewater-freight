@@ -2,6 +2,7 @@ package com.tidewater.freight.exception;
 
 import java.math.BigDecimal;
 
+/** The shipment weight is missing, zero or negative. */
 public class InvalidWeightException extends ShippingException {
 
     private final String zone;

@@ -199,12 +199,12 @@ Run under JDK 21.
 
 | Measure | Result |
 |---|---|
-| Tests | 66 run, 0 failures |
-| JaCoCo line coverage | 100% (65 / 65 lines) |
-| JaCoCo instruction coverage | 100% (325 / 325) |
-| JaCoCo branch coverage | 100% (18 / 18) |
-| PIT mutation coverage | 100% (15 / 15) |
-| PIT test strength | 100% |
+| Tests | 70 run, 0 failures |
+| JaCoCo line coverage | 100% (69 / 69 lines) |
+| JaCoCo instruction coverage | 100% (354 / 354) |
+| JaCoCo branch coverage | 100% (20 / 20) |
+| PIT mutation coverage | 100% (18 / 18) |
+| PIT test strength | 100% (18 / 18) |
 
 `Demo` is excluded from both reports. Before the exclusion, the only uncovered code was `Demo`: JaCoCo showed 82% of instructions and 100% of branches, and PIT killed 14 of 20 mutants with none surviving and 6 not covered.
 
