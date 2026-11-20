@@ -1,6 +1,6 @@
 # Analysis: Inherited Tidewater Shipping Cost Service
 
-Scope: `ShippingCalculator`, `RateRepository`, `InMemoryRateRepository`, `Demo`, and `ShippingCalculatorTest`, as received (before any change).
+Scope: ShippingCalculator, RateRepository, InMemoryRateRepository, Demo, and ShippingCalculatorTest, as received (before any change). These are the original names. In the refactored code the repository classes are ZoneRuleRepository and InMemoryZoneRuleRepository
 
 Evidence key: **[measured]** means I ran the unmodified code and observed the result. **[predicted]** means an expectation I reasoned out from reading the original tests. I did not run it.
 

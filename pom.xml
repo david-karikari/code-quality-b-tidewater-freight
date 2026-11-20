@@ -16,6 +16,8 @@
         <jacoco.version>0.8.12</jacoco.version>
         <pitest.version>1.16.1</pitest.version>
         <pitest.junit5.version>1.2.1</pitest.junit5.version>
+        <!-- Empty default so surefire's @{argLine} still resolves when the JaCoCo agent is not attached;
+     JaCoCo overwrites it with its agent option when it runs. -->
         <argLine></argLine>
     </properties>
 
@@ -79,6 +81,9 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
+                    <!-- @{argLine}: keep the JaCoCo agent. -javaagent: load Mockito as an agent so its inline mock maker
+     does not self-attach (JDK 21+ warning). The jar path comes from the dependency plugin's
+     "properties" goal above, which runs in an earlier lifecycle phase than surefire. -->
                     <argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar} -Xshare:off</argLine>
                 </configuration>
             </plugin>
@@ -135,4 +140,28 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- mvn verify -Pmutation: runs the tests, then PIT mutation testing, in one command. -->
+        <profile>
+            <id>mutation</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                        <executions>
+                            <execution>
+                                <id>mutation-coverage</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>mutationCoverage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

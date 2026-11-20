@@ -1,8 +1,6 @@
 package com.tidewater.freight;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -107,9 +105,26 @@ class ShippingCalculatorTest {
     }
 
     @Test
-    void rejectsMissingDependenciesAndAMissingShipment() {
-        assertThrows(NullPointerException.class, () -> new ShippingCalculator(null, heavyItemSurcharge));
-        assertThrows(NullPointerException.class, () -> new ShippingCalculator(zoneRules, null));
-        assertThrows(NullPointerException.class, () -> calculator.calculateCost(null));
+    void rejectsAMissingZoneRuleRepository() {
+        NullPointerException e = assertThrows(NullPointerException.class,
+                () -> new ShippingCalculator(null, heavyItemSurcharge));
+
+        assertTrue(e.getMessage().contains("zoneRules"));
+    }
+
+    @Test
+    void rejectsAMissingHeavyItemSurcharge() {
+        NullPointerException e = assertThrows(NullPointerException.class,
+                () -> new ShippingCalculator(zoneRules, null));
+
+        assertTrue(e.getMessage().contains("heavyItemSurcharge"));
+    }
+
+    @Test
+    void rejectsAMissingShipment() {
+        NullPointerException e = assertThrows(NullPointerException.class,
+                () -> calculator.calculateCost(null));
+
+        assertTrue(e.getMessage().contains("shipment"));
     }
 }

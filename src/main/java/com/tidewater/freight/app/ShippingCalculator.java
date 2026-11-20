@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
-
 /**
  * Works out the cost of a shipment in GHS.
  *
@@ -22,7 +21,6 @@ import java.util.Objects;
  * {@link UnknownZoneException}. Invalid input cannot reach this class because
  * {@link Shipment} rejects it on creation.
  */
-
 public class ShippingCalculator {
 
     private static final int CURRENCY_SCALE = 2;

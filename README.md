@@ -138,6 +138,7 @@ These were not in the brief. Each is a single place to change if the answer diff
 3. Zone codes are case-sensitive.
 4. Rounding to two decimal places, half up, is the right rule for GHS.
 5. The express multiplier applies after the zone fee and the heavy-item surcharge. This was the original order and was kept.
+6. There is no maximum shipment weight, because the brief gives none
 
 ## What was kept, fixed or rewritten
 
@@ -161,7 +162,7 @@ These were not in the brief. Each is a single place to change if the answer diff
 
 ## Testing
 
-The suite has 70 tests, in JUnit 5 with Mockito. It runs with `mvn test`.
+The suite has 72 tests, in JUnit 5 with Mockito. It runs with `mvn test`.
 
 | Test class | Tests | What it covers |
 |---|---|---|
@@ -177,7 +178,7 @@ The suite has 70 tests, in JUnit 5 with Mockito. It runs with `mvn test`.
 ### What makes these tests trustworthy
 
 - **Every test asserts a real value or a thrown exception.** None of them can pass on `> 0` or a non-null check, which is how the AI-generated tests passed.
-- **Money is compared by value, never by scale.** `Amounts.assertAmountEquals` uses `compareTo`, and expected values are written as strings.
+- **Money is compared by value in the unit tests.** `Amounts.assertAmountEquals` uses `compareTo`, with expected values written as strings. Calculator totals are compared with `assertEquals` on purpose, so the two-decimal scale is checked as well.
 - **Mocks replace collaborators, never the class under test.** The Mockito tests assert the price that comes back. A `verify` is only a secondary check.
 - **Exceptions are asserted by type and by the data they carry** (`getZone()`, `getWeightKg()`), plus that the message names the offending values. Whole messages are not compared, so rewording one does not break a test.
 - **No test compares console output.** `Demo` is excluded from the reports for that reason (see Known limitations).
@@ -199,14 +200,28 @@ Run under JDK 21.
 
 | Measure | Result |
 |---|---|
-| Tests | 70 run, 0 failures |
+| Tests | 72 run, 0 failures |
 | JaCoCo line coverage | 100% (69 / 69 lines) |
 | JaCoCo instruction coverage | 100% (354 / 354) |
 | JaCoCo branch coverage | 100% (20 / 20) |
 | PIT mutation coverage | 100% (18 / 18) |
 | PIT test strength | 100% (18 / 18) |
 
-`Demo` is excluded from both reports. Before the exclusion, the only uncovered code was `Demo`: JaCoCo showed 82% of instructions and 100% of branches, and PIT killed 14 of 20 mutants with none surviving and 6 not covered.
+## Coverage by package
+
+| Package | Line coverage | Branch coverage | Mutation coverage | Test strength |
+|---|---|---|---|---|
+| `com.tidewater.freight.model` | 100% (16 / 16) | 100% (10 / 10) | 100% (1 / 1) | 100% (1 / 1) |
+| `com.tidewater.freight.repository` | 100% (12 / 12) | 100% (6 / 6) | 100% (4 / 4) | 100% (4 / 4) |
+| `com.tidewater.freight.pricing` | 100% (15 / 15) | 100% (4 / 4) | 100% (8 / 8) | 100% (8 / 8) |
+| `com.tidewater.freight.app` | 100% (12 / 12) | n/a | 100% (2 / 2) | 100% (2 / 2) |
+| `com.tidewater.freight.exception` | 100% (14 / 14) | n/a | 100% (3 / 3) | 100% (3 / 3) |
+| **Total** | **100% (69 / 69)** | **100% (20 / 20)** | **100% (18 / 18)** | **100% (18 / 18)** |
+
+Line and branch figures come from JaCoCo. Mutation coverage and test strength come from PIT. The `app` and `exception` packages contain no branches, so branch coverage does not apply.
+
+
+`Demo` is excluded from both reports. Historical, for context only: an early run, before `Demo` was excluded and before `FlatRateZoneRule` validated its inputs, showed 82% instruction coverage in JaCoCo with the only uncovered code in `Demo`, and 14 of 20 mutants killed in PIT with none surviving. The current figures are the ones in the table above.
 
 ### Manual mutation checks
 
@@ -253,4 +268,4 @@ These are the mistakes this exercise found. Check for them in review:
 | One currency and one unit | Prices are in GHS and weights in kg. Neither is a type. |
 | `Demo` is not covered by tests | It is excluded from the coverage and mutation reports because it is a console entry point. Its one catch block is checked by running it. |
 | PIT cannot mutate `BigDecimal` arithmetic | The manual mutation checks above cover this. They were done by hand and are not repeated automatically. |
-| No logging | Failures are thrown to the caller and reported at the edge. Adding logging would belong in the caller, next to the single catch. |
+| No logging | Failures are thrown to the caller and reported at the edge, in `Demo.run`, with `System.out`. A logger would be added in the caller, next to the single catch. |

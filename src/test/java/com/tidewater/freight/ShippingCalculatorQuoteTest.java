@@ -1,8 +1,7 @@
 package com.tidewater.freight;
 
 import static com.tidewater.freight.testsupport.Amounts.assertAmountEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 
@@ -69,6 +68,8 @@ class ShippingCalculatorQuoteTest {
 
     @Test
     void aMissingShipmentIsRejected() {
-        assertThrows(NullPointerException.class, () -> calculator.quote(null));
+        NullPointerException e = assertThrows(NullPointerException.class, () -> calculator.quote(null));
+
+        assertTrue(e.getMessage().contains("shipment"));
     }
 }

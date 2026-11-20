@@ -20,6 +20,7 @@ public class Demo {
         run(calculator, "INTERNATIONAL", "40", ServiceLevel.EXPRESS);
         run(calculator, "MOON", "10", ServiceLevel.STANDARD);
         run(calculator, "DOMESTIC", "-5", ServiceLevel.STANDARD);
+        run(calculator, "DOMESTIC", "abc", ServiceLevel.STANDARD);
     }
 
     /** The single place where a shipping failure is caught: it is reported, never hidden. */
@@ -34,6 +35,8 @@ public class Demo {
                     + ", " + quote.serviceLevel() + ")");
         } catch (ShippingException e) {
             System.out.println(label + " -> rejected: " + e.getMessage());
+        } catch (NumberFormatException e) {
+        System.out.println(label + " -> rejected: weight is not a number: " + weightKg);
         }
     }
 }
