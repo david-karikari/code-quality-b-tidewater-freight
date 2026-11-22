@@ -50,10 +50,16 @@ class ShippingCalculatorQuoteTest {
     }
 
     @Test
-    void calculateCostIsTheTotalOfTheQuote() {
+    void regionalExpressTotalIsCalculatedCorrectly() {
         Shipment shipment = new Shipment("REGIONAL", new BigDecimal("31"), ServiceLevel.EXPRESS);
 
         assertEquals(new BigDecimal("417.00"), calculator.quote(shipment).total()); // (248 + 10 + 20) x 1.5
+    }
+
+    @Test
+    void calculateCostIsTheTotalOfTheQuote() {
+        Shipment shipment = new Shipment("REGIONAL", new BigDecimal("31"), ServiceLevel.EXPRESS);
+
         assertEquals(calculator.quote(shipment).total(), calculator.calculateCost(shipment));
     }
 
@@ -61,15 +67,15 @@ class ShippingCalculatorQuoteTest {
     void anUnknownZoneStillFailsWithTheZone() {
         Shipment shipment = new Shipment("MOON", BigDecimal.ONE, ServiceLevel.STANDARD);
 
-        UnknownZoneException e = assertThrows(UnknownZoneException.class, () -> calculator.quote(shipment));
+        UnknownZoneException uze = assertThrows(UnknownZoneException.class, () -> calculator.quote(shipment));
 
-        assertEquals("MOON", e.getZone());
+        assertEquals("MOON", uze.getZone());
     }
 
     @Test
     void aMissingShipmentIsRejected() {
-        NullPointerException e = assertThrows(NullPointerException.class, () -> calculator.quote(null));
+        NullPointerException nle = assertThrows(NullPointerException.class, () -> calculator.quote(null));
 
-        assertTrue(e.getMessage().contains("shipment"));
+        assertTrue(nle.getMessage().contains("shipment"));
     }
 }

@@ -40,11 +40,11 @@ class ShipmentTest {
     @NullAndEmptySource
     @ValueSource(strings = {" ", "\t"})
     void rejectsAMissingOrBlankZoneAndSaysWhatElseWasGiven(String zone) {
-        InvalidShipmentException e = assertThrows(InvalidShipmentException.class,
+        InvalidShipmentException ise = assertThrows(InvalidShipmentException.class,
                 () -> new Shipment(zone, TWO_KG, ServiceLevel.EXPRESS));
 
-        assertTrue(e.getMessage().contains("2"));
-        assertTrue(e.getMessage().contains("EXPRESS"));
+        assertTrue(ise.getMessage().contains("2"));
+        assertTrue(ise.getMessage().contains("EXPRESS"));
     }
 
     @ParameterizedTest(name = "weight {0} is rejected")
@@ -52,13 +52,13 @@ class ShipmentTest {
     void rejectsZeroAndNegativeWeights(String weightKg) {
         BigDecimal weight = new BigDecimal(weightKg);
 
-        InvalidWeightException e = assertThrows(InvalidWeightException.class,
+        InvalidWeightException iwe = assertThrows(InvalidWeightException.class,
                 () -> new Shipment("DOMESTIC", weight, ServiceLevel.STANDARD));
 
-        assertEquals("DOMESTIC", e.getZone());
-        assertAmountEquals(weightKg, e.getWeightKg());
-        assertTrue(e.getMessage().contains("DOMESTIC"));
-        assertTrue(e.getMessage().contains(weightKg));
+        assertEquals("DOMESTIC", iwe.getZone());
+        assertAmountEquals(weightKg, iwe.getWeightKg());
+        assertTrue(iwe.getMessage().contains("DOMESTIC"));
+        assertTrue(iwe.getMessage().contains(weightKg));
     }
 
     @Test
@@ -72,15 +72,18 @@ class ShipmentTest {
 
     @Test
     void rejectsAMissingServiceLevelAndSaysWhatElseWasGiven() {
-        InvalidShipmentException e = assertThrows(InvalidShipmentException.class,
+        InvalidShipmentException ise = assertThrows(InvalidShipmentException.class,
                 () -> new Shipment("DOMESTIC", TWO_KG, null));
 
-        assertTrue(e.getMessage().contains("DOMESTIC"));
-        assertTrue(e.getMessage().contains("2"));
+        assertTrue(ise.getMessage().contains("DOMESTIC"));
+        assertTrue(ise.getMessage().contains("2"));
     }
 
     @Test
     void reportsTheMissingZoneFirstWhenEverythingIsMissing() {
-        assertThrows(InvalidShipmentException.class, () -> new Shipment(null, null, null));
+        InvalidShipmentException ise = assertThrows(InvalidShipmentException.class,
+                () -> new Shipment(null, null, null));
+
+        assertTrue(ise.getMessage().contains("Zone is required"));
     }
 }

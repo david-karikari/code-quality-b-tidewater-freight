@@ -44,14 +44,26 @@ class ShippingCalculatorPricingTest {
     }
 
     @Test
-    void aNewZoneWithItsOwnRulesIsPricedWithoutChangingTheCalculator() {
+    void arcticStandardIsPricedByTiers() {
         ShippingCalculator withArctic = calculatorWithArcticZone();
 
         // 5 kg x 20 + 3 kg x 12 + 40 fee = 176
         assertEquals(new BigDecimal("176.00"),
                 withArctic.calculateCost(new Shipment("ARCTIC", new BigDecimal("8"), ServiceLevel.STANDARD)));
+    }
+
+    @Test
+    void arcticExpressAppliesTheMultiplier() {
+        ShippingCalculator withArctic = calculatorWithArcticZone();
+        // 176 x 1.5 = 264
         assertEquals(new BigDecimal("264.00"),
                 withArctic.calculateCost(new Shipment("ARCTIC", new BigDecimal("8"), ServiceLevel.EXPRESS)));
+    }
+
+    @Test
+    void arcticHeavyShipmentAddsTheSurcharge() {
+        ShippingCalculator withArctic = calculatorWithArcticZone();
+
         // 100 + 35 x 12 + 40 = 560, plus the heavy-item surcharge of 20
         assertEquals(new BigDecimal("580.00"),
                 withArctic.calculateCost(new Shipment("ARCTIC", new BigDecimal("40"), ServiceLevel.STANDARD)));

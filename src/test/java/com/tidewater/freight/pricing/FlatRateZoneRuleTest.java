@@ -47,11 +47,11 @@ class FlatRateZoneRuleTest {
 
     @Test
     void rejectsANegativeFeeAndNamesTheZone() {
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+        IllegalArgumentException iae = assertThrows(IllegalArgumentException.class,
                 () -> new FlatRateZoneRule("ARCTIC", BigDecimal.ONE, new BigDecimal("-0.5")));
 
-        assertTrue(e.getMessage().contains("ARCTIC"));
-        assertTrue(e.getMessage().contains("-0.5"));
+        assertTrue(iae.getMessage().contains("ARCTIC"));
+        assertTrue(iae.getMessage().contains("-0.5"));
     }
 
     @Test
@@ -60,12 +60,23 @@ class FlatRateZoneRuleTest {
     }
 
     @Test
-    void rejectsMissingValues() {
-        assertThrows(NullPointerException.class,
+    void rejectsMissingZone() {
+        NullPointerException e = assertThrows(NullPointerException.class,
                 () -> new FlatRateZoneRule(null, BigDecimal.ONE, BigDecimal.ZERO));
-        assertThrows(NullPointerException.class,
+        assertTrue(e.getMessage().contains("zone"));
+    }
+
+    @Test
+    void rejectsMissingRatePerKg() {
+        NullPointerException e = assertThrows(NullPointerException.class,
                 () -> new FlatRateZoneRule("ARCTIC", null, BigDecimal.ZERO));
-        assertThrows(NullPointerException.class,
+        assertTrue(e.getMessage().contains("ratePerKg"));
+    }
+
+    @Test
+    void rejectsMissingBaseFee() {
+        NullPointerException e = assertThrows(NullPointerException.class,
                 () -> new FlatRateZoneRule("ARCTIC", BigDecimal.ONE, null));
+        assertTrue(e.getMessage().contains("fixedFee"));
     }
 }

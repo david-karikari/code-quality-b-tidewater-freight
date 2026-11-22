@@ -23,8 +23,8 @@ import java.util.Objects;
  */
 public class ShippingCalculator {
 
-    private static final int CURRENCY_SCALE = 2;
-    private static final RoundingMode ROUNDING = RoundingMode.HALF_UP;
+    private static final int CURRENCY_DECIMAL_PLACES = 2;
+    private static final RoundingMode CURRENCY_ROUNDING_MODE = RoundingMode.HALF_UP;
 
     private final ZoneRuleRepository zoneRules;
     private final HeavyItemSurcharge heavyItemSurcharge;
@@ -49,7 +49,7 @@ public class ShippingCalculator {
         BigDecimal zonePrice = zoneRules.findRule(shipment.zone()).price(shipment.weightKg());
         BigDecimal surcharge = heavyItemSurcharge.forWeight(shipment.weightKg());
         BigDecimal total = shipment.serviceLevel().apply(zonePrice.add(surcharge))
-                .setScale(CURRENCY_SCALE, ROUNDING);
+                .setScale(CURRENCY_DECIMAL_PLACES, CURRENCY_ROUNDING_MODE);
         return new ShippingQuote(zonePrice, surcharge, shipment.serviceLevel(), total);
     }
 }

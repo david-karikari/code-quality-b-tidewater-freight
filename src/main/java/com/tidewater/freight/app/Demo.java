@@ -36,7 +36,7 @@ public class Demo {
         } catch (ShippingException e) {
             System.out.println(label + " -> rejected: " + e.getMessage());
         } catch (NumberFormatException e) {
-        System.out.println(label + " -> rejected: weight is not a number: " + weightKg);
+            System.out.println(label + " -> rejected: weight is not a number: " + weightKg);
         }
     }
 }

@@ -36,22 +36,22 @@ class InMemoryZoneRuleRepositoryTest {
         assertEquals(zone, standard.findRule(zone).zone());
     }
 
-    @ParameterizedTest(name = "{0}: 10 kg costs {1}")
+    @ParameterizedTest(name = "{0}: 20 kg costs {1}")
     @CsvSource({
-            "DOMESTIC,      50",   // 5 x 10
-            "REGIONAL,      90",   // 8 x 10 + 10
-            "INTERNATIONAL, 175"   // 15 x 10 + 25
+            "DOMESTIC,      100",   // 5 x 20
+            "REGIONAL,      170",   // 8 x 20 + 10
+            "INTERNATIONAL, 325"   // 15 x 20 + 25
     })
     void standardRulesCarryTheCurrentRatesAndFees(String zone, String expectedPrice) {
-        assertAmountEquals(expectedPrice, standard.findRule(zone).price(new BigDecimal("10")));
+        assertAmountEquals(expectedPrice, standard.findRule(zone).price(new BigDecimal("20")));
     }
 
     @Test
     void unknownZoneIsReportedWithTheZoneThatWasAskedFor() {
-        UnknownZoneException e = assertThrows(UnknownZoneException.class, () -> standard.findRule("MOON"));
+        UnknownZoneException uze = assertThrows(UnknownZoneException.class, () -> standard.findRule("MOON"));
 
-        assertEquals("MOON", e.getZone());
-        assertTrue(e.getMessage().contains("MOON"));
+        assertEquals("MOON", uze.getZone());
+        assertTrue(uze.getMessage().contains("MOON"));
     }
 
     @Test
@@ -61,9 +61,9 @@ class InMemoryZoneRuleRepositoryTest {
 
     @Test
     void aNullZoneIsUnknownNotACrash() {
-        UnknownZoneException e = assertThrows(UnknownZoneException.class, () -> standard.findRule(null));
+        UnknownZoneException uze = assertThrows(UnknownZoneException.class, () -> standard.findRule(null));
 
-        assertNull(e.getZone());
+        assertNull(uze.getZone());
     }
 
     @Test
@@ -71,9 +71,9 @@ class InMemoryZoneRuleRepositoryTest {
         ZonePricingRule first = new FlatRateZoneRule("DOMESTIC", BigDecimal.ONE, BigDecimal.ZERO);
         ZonePricingRule second = new FlatRateZoneRule("DOMESTIC", BigDecimal.TEN, BigDecimal.ZERO);
 
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+        IllegalArgumentException iae = assertThrows(IllegalArgumentException.class,
                 () -> new InMemoryZoneRuleRepository(List.of(first, second)));
 
-        assertTrue(e.getMessage().contains("DOMESTIC"));
+        assertTrue(iae.getMessage().contains("DOMESTIC"));
     }
 }
