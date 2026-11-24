@@ -19,9 +19,11 @@ Expected demo output:
 
 ```
 DOMESTIC 10kg STANDARD -> GHS 50.00 (zone price 50 + heavy-item surcharge 0, STANDARD)
+DOMESTIC 10kg STANDARD -> GHS 50.00 (zone price 50 + heavy-item surcharge 0, STANDARD)
 INTERNATIONAL 40kg EXPRESS -> GHS 967.50 (zone price 625 + heavy-item surcharge 20, EXPRESS)
 MOON 10kg STANDARD -> rejected: No pricing rule for zone: MOON
 DOMESTIC -5kg STANDARD -> rejected: Weight must be greater than zero for zone DOMESTIC but was -5
+DOMESTIC abckg STANDARD -> rejected: weight is not a number: abc
 ```
 
 ## Pricing rules
