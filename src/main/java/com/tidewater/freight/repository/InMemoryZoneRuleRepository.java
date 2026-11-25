@@ -29,7 +29,8 @@ public final class InMemoryZoneRuleRepository implements ZoneRuleRepository {
         return new InMemoryZoneRuleRepository(List.of(
                 new FlatRateZoneRule("DOMESTIC", new BigDecimal("5"), BigDecimal.ZERO),
                 new FlatRateZoneRule("REGIONAL", new BigDecimal("8"), new BigDecimal("10")),
-                new FlatRateZoneRule("INTERNATIONAL", new BigDecimal("15"), new BigDecimal("25"))));
+                new FlatRateZoneRule("INTERNATIONAL", new BigDecimal("15"), new BigDecimal("25")),
+                new FlatRateZoneRule("MARS", new BigDecimal("4"), new BigDecimal("100"))));
     }
 
     @Override

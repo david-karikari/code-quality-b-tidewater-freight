@@ -202,7 +202,7 @@ Run under JDK 21.
 
 | Measure | Result |
 |---|---|
-| Tests | 72 run, 0 failures |
+| Tests | 77 run, 0 failures |
 | JaCoCo line coverage | 100% (69 / 69 lines) |
 | JaCoCo instruction coverage | 100% (354 / 354) |
 | JaCoCo branch coverage | 100% (20 / 20) |
